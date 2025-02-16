@@ -94,3 +94,16 @@ df_vehicles = pd.DataFrame({'image': images, 'label': labels})
 
 # Sloučení dat
 df = pd.concat([df_vehicles, df_non_vehicles]).reset_index()
+
+# rozdelenie dát na tréningový a testovací set
+x_train, x_test, y_train, y_test = train_test_split(
+    df['image'], df['label'], random_state=42, test_size=0.2, stratify=df['label'])
+
+# Zmena rozmeru obraázkov
+def change_image_dimension(data):
+    data = np.reshape(data.to_list(), (len(data), 64, 64, 3))
+    return data
+
+x_train = change_image_dimension(x_train)
+x_test = change_image_dimension(x_test)
+
