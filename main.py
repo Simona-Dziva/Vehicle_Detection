@@ -167,3 +167,12 @@ plt.ylabel("Loss Magnitude")
 plt.legend()
 plt.show()
 
+# to plot training and validation accuracy
+plt.plot(r.history['accuracy'])
+plt.plot(r.history['val_accuracy'])
+
+
+plt.xlabel('Epoch Number')
+plt.ylabel("Model performance [accuracy]")
+plt.legend()
+plt.show()
