@@ -176,3 +176,32 @@ plt.xlabel('Epoch Number')
 plt.ylabel("Model performance [accuracy]")
 plt.legend()
 plt.show()
+
+# predikcia modelu na testovacich datach
+y_pred = model.predict(x_test)
+
+# confussion matrix
+cm = confusion_matrix(y_test, np.round(y_pred))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+disp.plot()
+plt.show()
+
+# Vyhodnocení
+print("Klasifikační report:")
+print(classification_report(y_test, np.round(y_pred)))
+
+# Zobrazení testovacích obrázků s předpověďmi
+plt.figure(figsize=(10, 10))
+indices = np.random.choice(len(x_test), 9, replace=False)  # Vyber 9 náhodných obrázků
+for i, index in enumerate(indices):
+    plt.subplot(3, 3, i+1)
+    img = x_test[index]
+    true_label = y_test[index]
+    pred_label = np.round(y_pred[index][0])
+    plt.imshow(img)
+    title = f"Předpověď: {'Vehicle' if pred_label == 1 else 'Non-vehicle'}\n"
+    title += f"Skutečnost: {'Vehicle' if true_label == 1 else 'Non-vehicle'}"
+    plt.title(title)
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
