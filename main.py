@@ -110,3 +110,12 @@ x_test = change_image_dimension(x_test)
 # Normalizácia / škálovnie hodnôt pixelov z [0, 255] na [0, 1]
 x_train = np.stack(x_train) / 255.0
 x_test = np.stack(x_test) / 255.0
+
+# Creating Arrays in NumPy (int) with an Integer Type
+y_train = np.array(y_train, dtype=int)
+y_test = np.array(y_test, dtype=int)
+
+print(x_train.shape)
+print(y_train.shape)
+print(x_test.shape)
+print(y_test.shape)
