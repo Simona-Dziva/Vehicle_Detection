@@ -1,52 +1,96 @@
-import cv2
-
-import numpy as np
-from matplotlib import pyplot as plt
-
-import pandas as pd
-
-from sklearn.preprocessing import StandardScaler
-
-from keras.models import Sequential
-from keras.layers import Input, Dense, Dropout
-
-from matplotlib import pyplot as plt
-
-from keras.datasets import mnist
+# import libraries
 
 import kagglehub
+import pandas as pd
+import os
 
-# Download latest version
+from PIL import Image
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+import random
+
+import tensorflow as tf
+import keras
+
+from keras.models import Sequential
+from keras.layers import BatchNormalization,MaxPool2D,Dense,Conv2D,Flatten
+from keras.callbacks import EarlyStopping,LearningRateScheduler
+
+from sklearn.metrics import classification_report , ConfusionMatrixDisplay , confusion_matrix
+from sklearn.model_selection import StratifiedShuffleSplit
+
+import matplotlib.pyplot as plt
+
+# Stažení datové sady
 path = kagglehub.dataset_download("brsdincer/vehicle-detection-image-set")
-
 print("Path to dataset files:", path)
 
-def load_images(dataset_dir):
-    """
-    Loads images from a given directory and its subdirectories.
+# Nastavenie cesty k datasetu
+dataset_path_1 = "/root/.cache/kagglehub/datasets/brsdincer/vehicle-detection-image-set/versions/1/data/non-vehicles"
+dataset_path_2 = "/root/.cache/kagglehub/datasets/brsdincer/vehicle-detection-image-set/versions/1/data/vehicles"
 
-    Args:
-        dataset_dir (str): Path to the directory containing images.
+# Načtení dat
+df=pd.DataFrame(columns=['image','label'])
 
-    Returns:
-        tuple: A tuple containing:
-            - images (list): List of loaded images as NumPy arrays.
-            - image_paths (list): List of corresponding file paths for the images.
-    """
-    images = []  # Initialize an empty list to store the loaded images
-    image_paths = []  # Initialize an empty list to store the paths of the images
+# Overenie, či priečinok 1 non-vehicles existuje
+if os.path.exists(dataset_path_1):
+    print("Dataset nájdený!")
+    print(df['label'].value_counts())
+    print("Zoznam súborov:", os.listdir(dataset_path_1))
+else:
+    print("Zložka non-vehicles neexistuje. Skontroluj cestu k datasetu.")
 
-    # Walk through the directory structure
-    for root, _, files in os.walk(dataset_dir):
-        # Iterate over all files in the current directory
-        for file in files:
-            # Check if the file has an image extension (jpg, png, jpeg)
-            if file.endswith((".jpg", ".png", ".jpeg")):
-                image_path = os.path.join(root, file)  # Construct the full file path
-                image = cv2.imread(image_path)  # Load the image using OpenCV
-                if image is not None:  # Check if the image was loaded successfully
-                    images.append(image)  # Add the image to the list
-                    image_paths.append(image_path)  # Add the corresponding path to the list
+# Overenie, či priečinok 2 vehicle existuje
+if os.path.exists(dataset_path_2):
+    print("Dataset nájdený!")
+    print(df['label'].value_counts())
+    print("Zoznam súborov:", os.listdir(dataset_path_2))
+else:
+    print("Zložka vehicles neexistuje. Skontroluj cestu k datasetu.")
 
-    # Return the loaded images and their file paths
-    return images, image_paths
+# Non-vehicles:Inicializácia zoznamov na efektívnejšie ukladanie dát
+images = []
+labels = []
+
+# Prechádzame cez obrázky - non vehicle
+for name in os.listdir(dataset_path_1):  # Nájde všetky formáty
+    filepath = os.path.join(dataset_path_1, name)  # Získanie úplnej cesty každého súboru
+    image = Image.open(filepath)
+    img = np.array(image)  # Priamo konvertujeme PIL image na NumPy pole
+
+    # Skontrolujeme, či má správny rozmer (64,64,3)
+    if img.shape != (64, 64, 3):
+        img = img.reshape((64, 64, 3))  # Pokus o reshape, ale môže zlyhať, ak veľkosť nepasuje
+
+    images.append(img)
+    labels.append(0)  # Predpokladáme, že label pre všetky obrázky je 0
+
+# Vytvorenie DataFrame
+df_non_vehicles = pd.DataFrame({'image': images, 'label': labels})
+
+# Vehicles: Inicializácia zoznamov na efektívnejšie ukladanie dát
+images = []
+labels = []
+
+# Prechádzanie cez všetky obrázky v zložke - vehicle
+for filename in os.listdir(dataset_path_2):  # Iteracia cez súbory v adresári
+    filepath = os.path.join(dataset_path_2, filename)  # Získanie úplnej cesty každého súboru
+    try:
+        image = Image.open(filepath)
+        img = np.array(image)  # Priamo konvertujeme PIL image na NumPy pole
+
+        # Skontrolujeme, či má správny rozmer (64,64,3)
+        if img.shape != (64, 64, 3):
+            img = img.reshape((64, 64, 3))  # Pokus o reshape, ale môže zlyhať, ak veľkosť nesedi
+
+        images.append(img)
+        labels.append(1)  # Predpokladáme, že label pre všetky obrázky je 1
+    except Exception as e:
+        print(f"Error processing file {filename}: {e}")
+
+# Vytvorenie DataFrame
+df_vehicles = pd.DataFrame({'image': images, 'label': labels})
+
+# Sloučení dat
+df = pd.concat([df_vehicles, df_non_vehicles]).reset_index()
