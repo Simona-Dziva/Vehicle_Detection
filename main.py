@@ -119,3 +119,32 @@ print(x_train.shape)
 print(y_train.shape)
 print(x_test.shape)
 print(y_test.shape)
+
+# Architektura modelu
+model = Sequential([
+    Conv2D(128, (3, 3), activation='relu', input_shape=(64, 64, 3)),
+    MaxPool2D((2, 2)),
+    BatchNormalization(),
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    BatchNormalization(),
+    Conv2D(32, (3, 3), activation='relu'),
+    MaxPool2D((2, 2)),
+    BatchNormalization(),
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+# callback function: určuje, aká bude rýchlosť učenia počas tréningu v závislosti od aktuálnej epochy
+def schedule(epoch,lr):
+    if epoch >= 5:
+        return 0.0001
+        # ak je epoch viac ako 5, učenie sa spomalí
+    return 0.001
+
+# ak sa presnoť nezlepší počas 4 epoch po sebe nasledujúcich, tak sa training zastaví
+# zabezpečuje, že tréning sa zastaví, ak sa počas 4 po sebe idúcich epoch neprejaví zlepšenie validačnej presnosti
+early_stop = EarlyStopping(monitor = 'val_accuracy', patience = 4)
+learning_rate_scheduler = LearningRateScheduler(schedule)
