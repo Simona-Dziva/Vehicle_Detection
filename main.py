@@ -148,3 +148,12 @@ def schedule(epoch,lr):
 # zabezpečuje, že tréning sa zastaví, ak sa počas 4 po sebe idúcich epoch neprejaví zlepšenie validačnej presnosti
 early_stop = EarlyStopping(monitor = 'val_accuracy', patience = 4)
 learning_rate_scheduler = LearningRateScheduler(schedule)
+
+# kompilacia modelu v knižnici Keras (v rámci TensorFlow); pripravenie modelu na trening
+model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['accuracy'])
+
+# Trénink modelu
+r = model.fit(
+    x_train, y_train, validation_data=(x_test, y_test),
+    epochs=20, batch_size=32, callbacks=[early_stop, learning_rate_scheduler]
+)
