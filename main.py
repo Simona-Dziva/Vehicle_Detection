@@ -157,3 +157,13 @@ r = model.fit(
     x_train, y_train, validation_data=(x_test, y_test),
     epochs=20, batch_size=32, callbacks=[early_stop, learning_rate_scheduler]
 )
+
+# plotting the loss values from model training
+plt.plot(r.history['loss'])
+plt.plot(r.history['val_loss'])
+
+plt.xlabel('Epoch Number')
+plt.ylabel("Loss Magnitude")
+plt.legend()
+plt.show()
+
