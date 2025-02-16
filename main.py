@@ -107,3 +107,6 @@ def change_image_dimension(data):
 x_train = change_image_dimension(x_train)
 x_test = change_image_dimension(x_test)
 
+# Normalizácia / škálovnie hodnôt pixelov z [0, 255] na [0, 1]
+x_train = np.stack(x_train) / 255.0
+x_test = np.stack(x_test) / 255.0
